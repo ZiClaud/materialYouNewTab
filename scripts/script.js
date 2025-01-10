@@ -33,7 +33,7 @@ let hourformat;
 // TODO: Move into file called `backup.js` or `backup-system.js`
 // TODO: Move into file called `welcome-greeting.js`(?)
 // TODO: Move into file called `animations.js`(?)
-// TODO: @Migua-RC, can you move all the proxy stuff in a file called `proxy.js`?
+// TODO: @Migua-RC, can you move all the proxy stuff in a file called `proxy.js`? - done :D (nothing much to move so moved search suggestion to searchsuggestions.js)
 
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -2210,7 +2210,7 @@ document.getElementById("searchQ").addEventListener("input", async function () {
         if (query.length > 0) {
             try {
                 // Fetch autocomplete suggestions
-                const suggestions = await getAutocompleteSuggestions(query);
+                const suggestions = await window.getAutocompleteSuggestions(query);
 
                 if (suggestions === "") {
                     hideResultBox();
@@ -2320,46 +2320,6 @@ function getClientParam() {
         return "firefox";  // Default to Firefox client if the browser is not recognized
     }
 }
-
-async function getAutocompleteSuggestions(query) {
-    const clientParam = getClientParam(); // Get the browser client parameter dynamically
-    var selectedOption = document.querySelector('input[name="search-engine"]:checked').value;
-    var searchEnginesapi = {
-        engine1: `https://www.google.com/complete/search?client=${clientParam}&q=${encodeURIComponent(query)}`,
-        engine2: `https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=list`,
-        engine3: `https://www.google.com/complete/search?client=${clientParam}&q=${encodeURIComponent(query)}`,
-        engine4: `https://search.brave.com/api/suggest?q=${encodeURIComponent(query)}&rich=true&source=web`,
-        engine5: `https://www.google.com/complete/search?client=${clientParam}&ds=yt&q=${encodeURIComponent(query)}`
-    };
-    const useproxyCheckbox = document.getElementById("useproxyCheckbox");
-    let apiUrl = searchEnginesapi[selectedOption];
-    if (useproxyCheckbox.checked) {
-        apiUrl = `${proxyurl}/proxy?url=${encodeURIComponent(apiUrl)}`;
-    }
-
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (selectedOption === "engine4") {
-            const suggestions = data[1].map(item => {
-                if (item.is_entity) {
-                    return `${item.q} - ${item.name} (${item.category ? item.category : "No category"})`;
-                } else {
-                    return item.q;
-                }
-            });
-            return suggestions;
-        } else {
-
-            return data[1];
-        }
-    } catch (error) {
-        console.error("Error fetching autocomplete suggestions:", error);
-        return [];
-    }
-}
-
 // Hide results when clicking outside
 document.addEventListener("click", function (event) {
     const searchbar = document.getElementById("searchbar");
